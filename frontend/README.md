@@ -1,16 +1,130 @@
-# React + Vite
+# 🔐 SecureAuth
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+A full-stack authentication and authorization system built using the **MERN Stack**. This project demonstrates modern authentication practices including JWT authentication, Google OAuth, Email OTP verification, Role-Based Access Control (RBAC), profile management, and secure session handling.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+# 📸 Screenshots
 
-## React Compiler
+## 🏠 Home Page
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+![Home Page](./screenShots/homePage.png)
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 👤 User Profile
+
+![Profile Page](./screenShots/ProfilePage.png)
+
+---
+
+## 🔒 Security Page
+
+![Security Page](./screenShots/securityPage.png)
+
+---
+
+## 🔑 Change Password
+
+![Change Password](./screenShots/changePasswordPage.png)
+
+## ✨ Features
+
+### 🔑 Authentication
+- Email & Password Registration
+- Secure Login
+- Google OAuth Login
+- Email OTP Verification
+- JWT Authentication
+- Refresh Token Authentication
+- HTTP-Only Cookie Authentication
+- Multi Device Login
+
+### 👤 User Features
+- Profile Management
+- Upload Profile Picture
+- Change Password
+- Change Email with OTP Verification
+- View Account Information
+
+### 🛡️ Admin Features
+- User Management Dashboard
+- View All Users
+- Change User Roles
+- Block / Unblock Users
+- Role-Based Access Control (RBAC)
+
+### 🔒 Security Features
+- Password Hashing (bcrypt)
+- JWT Access & Refresh Tokens
+- Protected Routes
+- Email Verification
+- OTP Expiration
+- Secure Cookies
+- Input Validation
+- Authentication Middleware
+
+---
+
+# 🛠 Tech Stack
+
+### Frontend
+- React (Vite)
+- Tailwind CSS
+- React Router DOM
+- Axios
+- React Hot Toast
+- React Icons
+- Google OAuth
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt
+- Nodemailer
+- Validator
+
+---
+
+# 📂 Project Structure
+
+```
+Authentication-System
+│
+├── backend
+│   ├── config
+│   ├── controllers
+│   ├── middleware
+│   ├── models
+│   ├── routes
+│   ├── utils
+│   └── server.js
+│
+├── frontend
+│   ├── public
+│   ├── src
+│   └── vite.config.js
+│
+├── screenShots
+│   ├── homePage.png
+│   ├── securityPage.png
+│   ├── ProfilePage.png
+│   └── changePasswordPage.png
+│
+├── .gitignore
+└── README.md
+
+GitHub:  
+https://github.com/pawan-tanwer
+
+LinkedIn:  
+(https://www.linkedin.com/in/pawan-tanwar-604372407/)
+
+---
+
+## ⭐ Support
+
+If you found this project useful, consider giving it a **Star** on GitHub.
