@@ -74,7 +74,7 @@ const Register = () => {
     }
   } catch (error) {
     console.log(error);
-    toast.error("An error occurred during registration");
+    toast.error(error.response?.data?.message || "Registration failed");
   }
   };
 
