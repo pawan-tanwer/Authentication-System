@@ -1,35 +1,16 @@
 const multer = require("multer");
 
 const errorMiddleware = (err, req, res, next) => {
+  // If a response was already sent, delegate to default Express error handler
+  if (res.headersSent) {
+    return next(err);
+  }
 
-    if (err instanceof multer.MulterError) {
-
-        if (err.code === "LIMIT_FILE_SIZE") {
-
-            return res.status(400).json({
-                success: false,
-                message: "File size must not exceed 2 MB."
-            });
-
-        }
-
-        return res.status(400).json({
-            success: false,
-            message: err.message,
-        });
-
-    }
-
-    if (err) {
-
-        return res.status(400).json({
-            success: false,
-            message: err.message,
-        });
-
-    }
-
-    next();
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  return res.status(statusCode).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 };
 
 module.exports = errorMiddleware;
