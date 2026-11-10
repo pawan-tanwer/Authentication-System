@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
     avatar: {
     url: {
         type: String,
-        default:"http://localhost:8000/profile.png"
+        default:"https://auth-backend-00je.onrender.com/profile.png"
     },
     publicId: {
         type: String,

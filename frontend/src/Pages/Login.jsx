@@ -40,7 +40,7 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `http://localhost:8000/api/auth/login`,
+        `https://auth-backend-00je.onrender.com/api/auth/login`,
         {
           email: data.email.trim(),
           password: data.password.trim(),

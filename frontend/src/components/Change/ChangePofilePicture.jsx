@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 
 const FRAME_SIZE = 220;   // on-screen crop circle size (px)
 const OUTPUT_SIZE = 400;  // exported image resolution (px)
-const userUrl = "http://localhost:8000/api/user"; // adjust if imported from elsewhere
+const userUrl = "https://auth-backend-00je.onrender.com/api/user"; // adjust if imported from elsewhere
 
 const ChangeProfilePicture = () => {
   const { 

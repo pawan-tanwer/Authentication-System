@@ -94,7 +94,7 @@ const ChangeEmailOtp = () => {
       setMessage({ type: "", text: "" });
 
       const { data } = await axios.post(
-        "http://localhost:8000/api/user/verify-email-otp",
+        "https://auth-backend-00je.onrender.com/api/user/verify-email-otp",
         { newEmail:email, otp: finalOtp },
         { withCredentials: true,
           headers: {
