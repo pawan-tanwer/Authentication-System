@@ -51,8 +51,6 @@ const Register = () => {
       return;
     }
     try{
-
-    }catch(error){
       const response = await axios.post(
       `${authUrl}/register`,
       {
@@ -62,9 +60,6 @@ const Register = () => {
       },
       { withCredentials: true },
     );
-    }
-    console.log(response.data);
-
     if (response.data.success) {
       toast.success(response.data.message);
       setData({
@@ -75,10 +70,10 @@ const Register = () => {
       });
       setEmail(data.email);
       navigate("/verify-email");
-    } else {
-      toast.error(response.data.message);
-      console.log("error :", response.data.message);
-      return;
+    }
+    }catch(error){
+      console.error("Error during registration:", error);
+      toast.error("An error occurred during registration");
     }
   };
 
