@@ -70,12 +70,6 @@ const register = async(req,res)=>{
         purpose:"verify-email"
     })
 
-     res.status(201).json({
-        success:true,
-        message:"OTP sent successfully.Please verify your email"    
-    })
-
-
     await transporter.sendMail({
         from:process.env.EMAIL_USER,
         to:email,
@@ -86,6 +80,10 @@ const register = async(req,res)=>{
         <h1>${otp}</h1>
         <p>This OTP is vaild for 5 minutes.</p>
         `
+    })
+    return res.status(201).json({
+        success:true,
+        message:"OTP sent successfully.Please verify your email"    
     })
     } catch (error) {
         return res.status(500).json({
@@ -580,10 +578,6 @@ const resendOtp = async(req,res)=>{
             purpose: "verify-email",
             expiresAt: otpExpiry,
         });
-        res.status(200).json({
-            success: true,
-            message: "OTP sent successfully.",
-        });
         await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
@@ -594,6 +588,10 @@ const resendOtp = async(req,res)=>{
         <h1>${otp}</h1>
         <p>This OTP is valid for 5 minutes.</p>
         `,
+        });
+        return res.status(200).json({
+            success: true,
+            message: "OTP sent successfully.",
         });
   } catch (error) {
     return res.status(500).json({
