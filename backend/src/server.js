@@ -25,6 +25,8 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+app.set("trust proxy", 1);
+
 //middleware for frontend
 app.use(express.urlencoded({ extended :true }));
 app.use(express.json());
