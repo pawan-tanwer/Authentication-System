@@ -31,6 +31,16 @@ app.use(express.static(path.join(__dirname, "public")));
 const connectDb = require("./config/db.js");
 connectDb();
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Authentication API is running",
+  });
+});
+
+app.get("/ping",(req,res)=>{
+  res.status(200).send("pong,server is running");
+})
 // routes
 const authRoute = require("./routes/auth.route.js");
 const userRoute = require("./routes/user.route.js");
