@@ -16,6 +16,7 @@ const Register = () => {
     setIsAuthentication,
   } = useContext(StoreContext);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [data, setData] = useState({
@@ -51,31 +52,32 @@ const Register = () => {
       return;
     }
     try {
-    const response = await axios.post(
-      `${authUrl}/register`,
-      {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-      },
-      { withCredentials: true }
-    );
-    
-    if (response.data.success) {
-      toast.success(response.data.message);
-      setData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-      setEmail(data.email);
-      navigate("/verify-email");
+      setLoading(true);
+      const response = await axios.post(
+        `${authUrl}/register`,
+        {
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        },
+        { withCredentials: true },
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+        setEmail(data.email);
+        navigate("/verify-email");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response?.data?.message || "Registration failed");
     }
-  } catch (error) {
-    console.log(error);
-    toast.error(error.response?.data?.message || "Registration failed");
-  }
   };
 
   const GoogleRegisterHandle = async (credentialResponse) => {
@@ -166,9 +168,15 @@ const Register = () => {
         </div>
       </div>
 
-      <button className="w-full p-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] font-medium text-white hover:opacity-90 transition-opacity active:bg-gray-950 cursor-pointer">
-        Create Account
-      </button>
+      {loading ? (
+        <p className="w-full p-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] font-medium text-white hover:opacity-90 transition-opacity active:bg-gray-950 cursor-pointer">
+          Loading...
+        </p>
+      ) : (
+        <button className="w-full p-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] font-medium text-white hover:opacity-90 transition-opacity active:bg-gray-950 cursor-pointer">
+          Create Account
+        </button>
+      )}
       <div className="flex items-center w-full gap-3 px-3">
         <div className="flex-1 h-[1px] bg-gray-600"></div>
         <p className="text-sm text-gray-300  whitespace-nowrap">
