@@ -151,8 +151,8 @@ try {
 
     res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: false, // true in production with HTTPS
-    sameSite: "lax",
+    secure: true, // true in production with HTTPS
+    sameSite: "none",
     maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -239,8 +239,8 @@ const login = async(req,res)=>{
         res.cookie("refreshToken",refreshToken,
             {
                 httpOnly:true,
-                secure:false,
-                sameSite:"lax",
+                secure:true,
+                sameSite:"none",
                 maxAge:30*24*60*60*1000
             }
         )
