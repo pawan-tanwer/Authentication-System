@@ -50,16 +50,17 @@ const Register = () => {
       toast.error("ConfirmPassword do not match");
       return;
     }
-    try{
-      const response = await axios.post(
+    try {
+    const response = await axios.post(
       `${authUrl}/register`,
       {
         name: data.name,
         email: data.email,
         password: data.password,
       },
-      { withCredentials: true },
+      { withCredentials: true }
     );
+    
     if (response.data.success) {
       toast.success(response.data.message);
       setData({
@@ -71,10 +72,10 @@ const Register = () => {
       setEmail(data.email);
       navigate("/verify-email");
     }
-    }catch(error){
-      console.error("Error during registration:", error);
-      toast.error("An error occurred during registration");
-    }
+  } catch (error) {
+    console.log(error);
+    toast.error("An error occurred during registration");
+  }
   };
 
   const GoogleRegisterHandle = async (credentialResponse) => {
