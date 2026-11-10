@@ -50,8 +50,10 @@ const Register = () => {
       toast.error("ConfirmPassword do not match");
       return;
     }
+    try{
 
-    const response = await axios.post(
+    }catch(error){
+      const response = await axios.post(
       `${authUrl}/register`,
       {
         name: data.name,
@@ -60,6 +62,7 @@ const Register = () => {
       },
       { withCredentials: true },
     );
+    }
     console.log(response.data);
 
     if (response.data.success) {
