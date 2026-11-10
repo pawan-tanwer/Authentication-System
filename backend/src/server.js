@@ -55,4 +55,4 @@ app.use("/api/user",userRoute);
 
 app.use(errorMiddleware)
 
-app.listen(process.env.PORT||8000,()=>console.log("server is running on port 8000"));
+app.listen(process.env.PORT||8000,"0.0.0.0",()=>console.log("server is running on port 8000"));
