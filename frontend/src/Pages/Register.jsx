@@ -75,8 +75,11 @@ const Register = () => {
         navigate("/verify-email");
       }
     } catch (error) {
+      setLoading(false);
       console.log(error);
       toast.error(error.response?.data?.message || "Registration failed");
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -169,7 +172,7 @@ const Register = () => {
       </div>
 
       {loading ? (
-        <p className="w-full p-2 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] font-medium text-white hover:opacity-90 transition-opacity active:bg-gray-950 cursor-pointer">
+        <p className="w-full p-2 text-center rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6366F1] font-medium text-white hover:opacity-90 transition-opacity active:bg-gray-950 cursor-pointer">
           Loading...
         </p>
       ) : (
