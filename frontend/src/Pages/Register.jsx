@@ -108,6 +108,8 @@ const Register = () => {
       toast.error(
         error.response?.data?.message || "Google authentication failed",
       );
+    }finally{
+      setLoading(false);
     }
   };
 
