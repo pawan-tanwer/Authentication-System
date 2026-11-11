@@ -75,11 +75,7 @@ const Register = () => {
       }
     } catch (error) {
       setLoading(false);
-<<<<<<< HEAD
-      console.log(error);
-=======
-      console.error("error", error);
->>>>>>> 37f80ea (send otp code changes)
+      console.error(error);
       toast.error(error.response?.data?.message || "Registration failed");
     }finally{
       setLoading(false);
