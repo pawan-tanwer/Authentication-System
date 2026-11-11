@@ -62,7 +62,6 @@ const Register = () => {
         },
         { withCredentials: true },
       );
-
       if (response.data.success) {
         toast.success(response.data.message);
         setData({
@@ -76,7 +75,11 @@ const Register = () => {
       }
     } catch (error) {
       setLoading(false);
+<<<<<<< HEAD
       console.log(error);
+=======
+      console.error("error", error);
+>>>>>>> 37f80ea (send otp code changes)
       toast.error(error.response?.data?.message || "Registration failed");
     }finally{
       setLoading(false);
