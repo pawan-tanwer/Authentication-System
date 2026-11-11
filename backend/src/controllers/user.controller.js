@@ -257,7 +257,8 @@ const changeEmail = async(req,res)=>{
                 message:"New email must be different from current email"
             })
         }
-        const isEmailExist = await userModel.findOne({newEmail});
+        const normalizedNewEmail = newEmail.trim().toLowerCase();
+        const isEmailExist = await userModel.findOne({ email: normalizedNewEmail });
         if(isEmailExist){
             return res.status(400).json({
                 success:false,
@@ -265,34 +266,44 @@ const changeEmail = async(req,res)=>{
             })
         }
         await emailOtpModel.deleteMany({
-            email: newEmail,
+            email: normalizedNewEmail,
             purpose: "change-email"
         });
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        await emailOtpModel.create({
-            email:newEmail,
+        const otpRecord = await emailOtpModel.create({
+            email:normalizedNewEmail,
             otp,
             purpose:"change-email",
             expiresAt:new Date(Date.now()+10*60*1000)
         })
 
-        res.status(200).json({
+        try {
+            await transporter.sendMail({
+                to: normalizedNewEmail,
+                subject: "Email Verification OTP",
+                text: `Your email-change verification OTP is ${otp}. It is valid for 10 minutes.`,
+                html: `
+                <h2>Email-Change Verification</h2>
+                <p>Your OTP is:</p>
+                <h1>${otp}</h1>
+                <p>This OTP is valid for 10 minutes.</p>
+                `
+            });
+        } catch (error) {
+            try {
+                await emailOtpModel.deleteOne({ _id: otpRecord._id });
+            } catch (cleanupError) {
+                console.error("Could not remove unsent email-change OTP:", cleanupError.message);
+            }
+            throw error;
+        }
+
+        return res.status(200).json({
             success:true,
             message:"OTP sent successfully "
-        })
-
-        await transporter.sendMail({
-            from:process.env.EMAIL_USER,
-            to:newEmail,
-            subject:"Email Verification OTP",
-            html:`
-            <h2>Email-Change Verification</h2>
-            <p>Your OTP is:</p> 
-            <h1>${otp}</h1>
-            <p>This OTP is vaild for 5 minutes.</p>
-            `
-        })
+        });
     } catch (error) {
+        console.error("Email-change OTP email failed:", error.message);
         return res.status(500).json({
             success:false,
             message:error.message

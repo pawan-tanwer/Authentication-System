@@ -74,7 +74,7 @@ const VerifyEmail = () => {
       );
       toast.success(response.data.message);
     } catch (error) {
-      toast.error(error.response.data.message || "Something wong");
+      toast.error(error.response?.data?.message || "Could not resend the code");
     }
     // yaha apni resend OTP API call karo
   };
@@ -106,7 +106,7 @@ const VerifyEmail = () => {
         toast.success(data.message);
       }
     } catch (error) {
-      toast.error(error.data.message || "Something went wrong");
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }

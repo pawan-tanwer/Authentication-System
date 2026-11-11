@@ -85,8 +85,22 @@ A production-ready authentication and authorization system built with the MERN S
 - Mongoose
 - JWT
 - bcrypt
-- Nodemailer
+- Resend email API
 - Validator
+
+---
+
+## Email OTP configuration
+
+The backend sends OTP email through the Resend HTTPS API. This works on Render's free web services, which block outbound SMTP connections on ports 25, 465, and 587.
+
+1. Create a Resend API key and verify the sender domain/address with Resend.
+2. Set `RESEND_API_KEY` and `EMAIL_FROM` in the backend service's Render environment settings. `EMAIL_FROM` must use a sender Resend has authorized.
+3. Redeploy the backend after saving the environment variables.
+
+For local development, copy `backend/.env.example` to `backend/.env` and set those variables. Do not commit the real API key.
+
+If mail delivery fails, the backend returns the email provider's error and leaves unverified accounts eligible to retry registration or request another OTP.
 
 ---
 
