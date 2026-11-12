@@ -5,8 +5,8 @@ export const StoreContext = createContext(null);
 const StoreContextProvider = (props)=>{
     // register login check ke liye
     const [type,setType] = useState("Login");
-    const authUrl = "https://auth-backend-00je.onrender.com/api/auth";
-    const userUrl = "https://auth-backend-00je.onrender.com/api/user";
+    const authUrl = "http://localhost:8000/api/auth";
+    const userUrl = "http://localhost:8000/api/user";
     // ye verification me kaam aayegi like email, password
     const [email,setEmail] = useState("");
     const [accessToken,setAccessToken] = useState();

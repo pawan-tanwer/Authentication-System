@@ -11,39 +11,6 @@ const {generateAccessToken,generateRefreshToken, verifyRefreshToken,
 
 const googleClient = require("../utils/google");
 
-const createAndSendOtp = async ({ email, purpose, subject, heading, expiresInMinutes }) => {
-    await emailOtpModel.deleteMany({ email, purpose });
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpRecord = await emailOtpModel.create({
-        email,
-        otp,
-        purpose,
-        expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
-    });
-
-    try {
-        await transporter.sendMail({
-            to: email,
-            subject,
-            text: `${heading}\nYour OTP is ${otp}. It is valid for ${expiresInMinutes} minutes.`,
-            html: `
-                <h2>${heading}</h2>
-                <p>Your OTP is:</p>
-                <h1>${otp}</h1>
-                <p>This OTP is valid for ${expiresInMinutes} minutes.</p>
-            `,
-        });
-    } catch (error) {
-        try {
-            await emailOtpModel.deleteOne({ _id: otpRecord._id });
-        } catch (cleanupError) {
-            console.error("Could not remove unsent OTP:", cleanupError.message);
-        }
-        throw error;
-    }
-};
-
 const register = async(req,res)=>{
     try {
         const {name,email,password} = req.body;
@@ -63,7 +30,6 @@ const register = async(req,res)=>{
             message:"Invalid Email Format"
         })
     }
-    const normalizedEmail = email.trim().toLowerCase();
 
     //password validate
     if(password.length<8){
@@ -73,40 +39,55 @@ const register = async(req,res)=>{
         })
     }
     //checking user exist with this email or not
-    const existingUser = await userModel.findOne({ email: normalizedEmail });
-    if(existingUser?.isEmailVerified){
+    const isUserExist = await userModel.findOne({email});
+    if(isUserExist){
         return res.status(409).json({
             success:false,
             message:"Email already registered"
         })
     }
+    // hashing the password
+    const saltRound = 10;
+    const hashPassword = await bcrypt.hash(password,saltRound);
 
-    if(!existingUser){
-        const saltRound = 10;
-        const hashPassword = await bcrypt.hash(password,saltRound);
+    // storeing in database
+    const user = await userModel.create({
+        name,
+        email,
+        password:hashPassword,
+        isEmailVerified:false
+    })
+    
+    // verifying email with otp
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    await emailOtpModel.deleteMany({email,purpose:"verify-email"});
 
-        await userModel.create({
-            name,
-            email: normalizedEmail,
-            password:hashPassword,
-            isEmailVerified:false
-        });
-    }
+    const otpExpiry = new Date(Date.now()+ 5*60*1000);
+    await emailOtpModel.create({
+        email,
+        otp,
+        expiresAt:otpExpiry,
+        purpose:"verify-email"
+    })
 
-    await createAndSendOtp({
-        email: normalizedEmail,
-        purpose: "verify-email",
-        subject: "Email Verification OTP",
-        heading: "Email Verification",
-        expiresInMinutes: 5,
-    });
-
-    return res.status(201).json({
+     res.status(201).json({
         success:true,
         message:"OTP sent successfully.Please verify your email"    
     })
+
+
+    await transporter.sendMail({
+        from:process.env.EMAIL_USER,
+        to:email,
+        subject:"Email Verification OTP",
+        html:`
+        <h2>Email Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is vaild for 5 minutes.</p>
+        `
+    })
     } catch (error) {
-        console.error("Registration OTP email failed:", error.message);
         return res.status(500).json({
             success:false,
             message:error.message
@@ -124,11 +105,7 @@ try {
         })
     }
 
-    const normalizedEmail = email.trim().toLowerCase();
-    const otpRecord = await emailOtpModel.findOne({
-        email: normalizedEmail,
-        purpose: "verify-email",
-    });
+    const otpRecord = await emailOtpModel.findOne({email});
     // checking otp found or not
     if(!otpRecord){
         return res.status(400).json({
@@ -151,7 +128,7 @@ try {
         })
     }
     // find user for registration complete
-    const user = await userModel.findOne({ email: normalizedEmail });
+    const user = await userModel.findOne({email});
 
     if(!user){
         return res.status(400).json({
@@ -174,15 +151,12 @@ try {
 
     res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true, // true in production with HTTPS
-    sameSite: "none",
+    secure: false, // true in production with HTTPS
+    sameSite: "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    await emailOtpModel.deleteOne({
-        email: normalizedEmail,
-        purpose: "verify-email",
-    });
+    await emailOtpModel.deleteOne({email});
 
     return res.status(200).json({
         success:true,
@@ -265,8 +239,8 @@ const login = async(req,res)=>{
         res.cookie("refreshToken",refreshToken,
             {
                 httpOnly:true,
-                secure:true,
-                sameSite:"none",
+                secure:false,
+                sameSite:"lax",
                 maxAge:30*24*60*60*1000
             }
         )
@@ -420,8 +394,7 @@ const forgotPassword = async(req,res)=>{
                 message:"Invalid email address"
             })
         }
-        const normalizedEmail = email.trim().toLowerCase();
-        const user = await userModel.findOne({ email: normalizedEmail });
+        const user = await userModel.findOne({email});
         if(!user){
             return res.status(404).json({
                 success:false,
@@ -434,20 +407,37 @@ const forgotPassword = async(req,res)=>{
                 message:"Please verify your email"
             })
         }
-        await createAndSendOtp({
-            email: normalizedEmail,
-            purpose: "reset-password",
-            subject: "Reset Password OTP",
-            heading: "Reset Password",
-            expiresInMinutes: 5,
-        });
-
-        return res.status(200).json({
+        const otp = Math.floor(100000+Math.random()*900000).toString();
+        await emailOtpModel.deleteMany({
+            email,
+            purpose:"reset-password"
+        })
+        const otpExpiry = new Date(Date.now() +5*60*1000);
+        await emailOtpModel.create({
+            email,
+            otp,
+            expiresAt:otpExpiry,
+            purpose:"reset-password"
+        })
+        
+         res.status(200).json({
             success:true,
             message:"Password reset otp sent successfully"
         })
+
+        await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Reset Password OTP",
+        html: `
+        <h2>Reset Password</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+         `,
+        });
+    
     } catch (error) {
-        console.error("Password reset OTP email failed:", error.message);
         return res.status(500).json({
             success:false,
             message:error.message
@@ -458,13 +448,13 @@ const verifyResetOtp = async(req,res)=>{
     try {
         const {email,otp} = req.body;
         if(!email || !otp){
-            return res.status(400).json({
+            return res.status(400).josn({
                 success:false,
                 message:"Email and OTP are required"
             })
         }
         const otpRecord = await emailOtpModel.findOne({
-            email: email.trim().toLowerCase(),
+            email,
             purpose:"reset-password"
         })      
         if(!otpRecord){
@@ -487,7 +477,7 @@ const verifyResetOtp = async(req,res)=>{
         }
 
         await emailOtpModel.deleteOne({
-            email: email.trim().toLowerCase(),
+            email,
             purpose:"reset-password"
         })
         const user = await userModel.findOne({email})
@@ -562,8 +552,7 @@ const resendOtp = async(req,res)=>{
                 message: "Invalid email address.",
             });
         }
-        const normalizedEmail = email.trim().toLowerCase();
-        const user = await userModel.findOne({ email: normalizedEmail });
+        const user = await userModel.findOne({ email });
 
         if (!user) {
             return res.status(404).json({
@@ -577,19 +566,36 @@ const resendOtp = async(req,res)=>{
                 message: "Email is already verified.",
             });
         }
-        await createAndSendOtp({
-            email: normalizedEmail,
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        await emailOtpModel.deleteMany({
+            email,
             purpose: "verify-email",
-            subject: "Verify Your Email",
-            heading: "Email Verification",
-            expiresInMinutes: 5,
         });
-        return res.status(200).json({
+
+        const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+
+        await emailOtpModel.create({
+            email,
+            otp,
+            purpose: "verify-email",
+            expiresAt: otpExpiry,
+        });
+        res.status(200).json({
             success: true,
             message: "OTP sent successfully.",
         });
+        await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Verify Your Email",
+        html: `
+        <h2>Email Verification</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+        `,
+        });
   } catch (error) {
-    console.error("Verification OTP resend failed:", error.message);
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -657,8 +663,8 @@ const googleAuth = async (req, res) => {
 
     res.cookie("refreshToken",refreshToken,{
         httpOnly:true,
-        secure:true,
-        sameSite:"none",
+        secure:false,
+        sameSite:"lax",
         maxAge:30*24*60*60*1000
     })
     return res.status(200).json({
